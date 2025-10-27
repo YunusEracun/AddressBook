@@ -1,6 +1,7 @@
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collections;
+package org.example;
+
+import java.util.*;
+
 public class AdresDefteriManager {
 
     private Map<String, Kisi> defter;
@@ -34,7 +35,31 @@ public class AdresDefteriManager {
         System.out.println("-------------------------------");
     }
 
+    public Collection<Kisi> kisiAra(String aramaMetni) {
+        Collection<Kisi> bulunanlar = new java.util.ArrayList<>();
+        String aramaKucuk = aramaMetni.toLowerCase();
 
+        for (Kisi kisi : defter.values()) {
+
+            if(kisi.getAd().toLowerCase().contains(aramaKucuk) ||
+               kisi.getSoyad().toLowerCase().contains(aramaKucuk) ||
+               kisi.getTelefonNumarasi().contains(aramaMetni))  {
+               bulunanlar.add(kisi);
+            }
+
+        }
+    return bulunanlar;
+    }
+
+    public boolean kisiSil(String ePosta) {
+        if(defter.containsKey(ePosta)) {
+            Kisi silinenKisi = defter.remove(ePosta);
+            System.out.println("BAŞARILI: " + silinenKisi.getAd() + " kişisi silindi.");
+            return true;
+        }
+        System.out.println("HATA: " + ePosta + " adresine sahip bir kişi bulunamadı.");
+        return false;
+    }
 
 
 
