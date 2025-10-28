@@ -1,11 +1,15 @@
 package org.example;
 
 import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-public class AdresDefteriManager {
+
+public class AdresDefteriService {
 
     private Map<String, Kisi> defter;
-    public AdresDefteriManager() {
+
+    public AdresDefteriService() {
         this.defter = new HashMap<>();
     }
 
@@ -61,17 +65,29 @@ public class AdresDefteriManager {
         return false;
     }
 
+    public Collection<Kisi> mukerrerAdSoyadBul() {
+        Set<String> gorulmusAdSoyadlar = new HashSet<>();
+        Collection<Kisi> mukerrerKisiler = new java.util.ArrayList<>();
 
+        for (Kisi kisi : defter.values()) {
 
+            String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
+            // burda Set kullanarak aynı isim soyisimdeki kişileri listeye 2. ekleyişimizde  bunları tespit edebilmek ıcın kllandk
+            if(!gorulmusAdSoyadlar.add(anahtar)) {
+                mukerrerKisiler.add(kisi);
+            }
 
+        }
+        return mukerrerKisiler;
+    }
 
+    @return
 
+    public String defteriJsonaCevir() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-
-
-
-
-
+        return gson.toJson(defter);
+    }
 
 
 

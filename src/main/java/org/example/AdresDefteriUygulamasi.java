@@ -5,7 +5,7 @@ import java.util.Collection;
 
 public class AdresDefteriUygulamasi {
 1
-    private static AdresDefteriManager manager = new AdresDefteriManager();
+    private static AdresDefteriService manager = new AdresDefteriService();
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
