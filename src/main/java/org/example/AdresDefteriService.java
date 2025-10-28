@@ -1,30 +1,36 @@
 package org.example;
-
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 
 public class AdresDefteriService {
 
     private Map<String, Kisi> defter;
 
+    private static final String DOSYA_ADRES = "adres_defteri.json";
+
     public AdresDefteriService() {
+
         this.defter = new HashMap<>();
     }
 
     public boolean kisiEkleme(Kisi yeniKisi) {
         String anahtar = yeniKisi.getePosta();
 
-        if(defter.containsKey(anahtar)) {
+        if (defter.containsKey(anahtar)) {
             System.out.println("HATA: Bu E-Posta (" + anahtar + ")adresi zaten kayıtlı.");
             return false;
         }
 
         defter.put(anahtar, yeniKisi);
-        System.out.println("BAŞARILI: "+ yeniKisi.getAd() + "kişisi adres defterine eklendi");
+        System.out.println("BAŞARILI: " + yeniKisi.getAd() + "kişisi adres defterine eklendi");
         return true;
     }
+
     public void tumKisileriListele() {
         if (defter.isEmpty()) {
             System.out.println("Adres defteri şu anda boş.");
@@ -45,18 +51,18 @@ public class AdresDefteriService {
 
         for (Kisi kisi : defter.values()) {
 
-            if(kisi.getAd().toLowerCase().contains(aramaKucuk) ||
-               kisi.getSoyad().toLowerCase().contains(aramaKucuk) ||
-               kisi.getTelefonNumarasi().contains(aramaMetni))  {
-               bulunanlar.add(kisi);
+            if (kisi.getAd().toLowerCase().contains(aramaKucuk) ||
+                    kisi.getSoyad().toLowerCase().contains(aramaKucuk) ||
+                    kisi.getTelefonNumarasi().contains(aramaMetni)) {
+                bulunanlar.add(kisi);
             }
 
         }
-    return bulunanlar;
+        return bulunanlar;
     }
 
     public boolean kisiSil(String ePosta) {
-        if(defter.containsKey(ePosta)) {
+        if (defter.containsKey(ePosta)) {
             Kisi silinenKisi = defter.remove(ePosta);
             System.out.println("BAŞARILI: " + silinenKisi.getAd() + " kişisi silindi.");
             return true;
@@ -73,7 +79,7 @@ public class AdresDefteriService {
 
             String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
             // burda Set kullanarak aynı isim soyisimdeki kişileri listeye 2. ekleyişimizde  bunları tespit edebilmek ıcın kllandk
-            if(!gorulmusAdSoyadlar.add(anahtar)) {
+            if (!gorulmusAdSoyadlar.add(anahtar)) {
                 mukerrerKisiler.add(kisi);
             }
 
@@ -81,7 +87,6 @@ public class AdresDefteriService {
         return mukerrerKisiler;
     }
 
-    @return
 
     public String defteriJsonaCevir() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -89,9 +94,46 @@ public class AdresDefteriService {
         return gson.toJson(defter);
     }
 
+    public boolean verileriKaydet() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+        try (FileWriter writer = new FileWriter(DOSYA_ADRES)) {
+            gson.toJson(defter, writer);
+            System.out.println("BAŞARILI: Adres defteri verileri dosyaya kaydedildi.");
+            return true;
+        } catch (IOException e) {
+            System.out.println("HATA: Veri kaydı sırasında bir hata oluştu.");
+            return false;
+        }
+    }
 
+    public boolean verileriYukle() {
+        File dosya = new File(DOSYA_ADRES);
+        if (!dosya.exists()) {
+            System.out.println("BİLGİ: Kayıt dosyası bulunamadı. Yeni boş defter oluşturuldu");
+            return false;
+        }
+        try (FileReader reader = new FileReader(DOSYA_ADRES)) {
+            Gson gson = new Gson();
 
+            Type mapTipi = new TypeToken<HashMap<String, Kisi>>() {
+            }.getType();
+
+            Map<String, Kisi> yuklenenDefter = gson.fromJson(reader, mapTipi);
+
+            if (yuklenenDefter != null) {
+                this.defter = yuklenenDefter;
+                System.out.println("BAŞARILI: Adres defterine " + defter.size() + " kişi yüklendi.");
+                return true;
+            }
+            return false;
+
+        } catch (IOException e) {
+            System.err.println("HATA: Veri yükleme sırasında bir hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
 }
+
 
 
