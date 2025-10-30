@@ -51,14 +51,14 @@ public class AdresDefteriUygulamasi {
                 manager.tumKisileriListele();
                 break;
             case 3:
-                kisiAra();
+                kisiAramaMenu();
                 break;
             case 4:
                 kisiSil();
                 break;
             case 5:
                 Collection<Kisi> mukerrerler = manager.mukerrerAdSoyadBul();
-                manager.mukerrerAdSoyadBul();
+
                 System.out.println("\n--- MÜKERRER KAYITLAR ---");
                 if (mukerrerler.isEmpty()) {
                     System.out.println("Mükerrer kayıt bulunamadı.");
@@ -97,23 +97,80 @@ public class AdresDefteriUygulamasi {
         manager.kisiEkleme(yeniKisi);
     }
 
-    private static void kisiAra() {
-        System.out.println("\n--- Kişi Arama ---");
-        System.out.print("Aranacak metni girin (Ad, Soyad veya Telefon): ");
-        String aramaMetni = scanner.nextLine();
+    private static void kisiAramaMenu() {
+        int altSecim = -1;
+        System.out.println("\n--- ARAMA TİPİ SEÇİMİ ---");
+        System.out.println("1. İsim ile Ara");
+        System.out.println("2. Soyisim ile Ara");
+        System.out.println("3. Telefon Numarası ile Ara");
+        System.out.println("4. E-Posta ile Hızlı Ara");
+        System.out.println("0. Geri");
+        System.out.print("Seçiminiz: ");
 
-        Collection<Kisi> sonuclar = manager.kisiAra(aramaMetni);
-
-        if (sonuclar.isEmpty()) {
-            System.out.println("Arama kriterinize uygun kişi bulunamadı.");
+        if (scanner.hasNextInt()) {
+            altSecim = scanner.nextInt();
+            scanner.nextLine();
         } else {
-            System.out.println("--- Bulunan Kişiler (" + sonuclar.size() + ") ---");
+            System.out.println("Geçersiz giriş. Lütfen bir rakam girin.");
+            scanner.nextLine();
+            return;
+        }
+
+        switch (altSecim) {
+            case 1:
+                kisiAraVeYazdir("ad");
+                break;
+            case 2:
+                kisiAraVeYazdir("soyisim");
+                break;
+            case 3:
+                kisiAraVeYazdir("telefon");
+                break;
+            case 4:
+                hizliKisiAraEpostaVeYazdir(); // O(1) arama
+                break;
+            case 0:
+                System.out.println("Ana menüye dönülüyor.");
+                break;
+            default:
+                System.out.println("Geçersiz seçim.");
+        }
+    }
+    private static void kisiAraVeYazdir(String aramaTipi) {
+        String arananDeger;
+        System.out.print("Aranacak " + aramaTipi + " değerini girin: ");
+        arananDeger = scanner.nextLine();
+        Collection<Kisi> sonuclar = manager.kisiAraGenel(arananDeger, aramaTipi);
+
+        System.out.println("\n--- ARAMA SONUÇLARI (" + aramaTipi.toUpperCase() + ") ---");
+        if (sonuclar.isEmpty()) {
+            System.out.println("'" + arananDeger + "' değerine eşleşen kayıt bulunamadı.");
+        } else {
+            System.out.println(sonuclar.size() + " adet kayıt bulundu:");
             for (Kisi kisi : sonuclar) {
                 System.out.println(kisi);
             }
-            System.out.println("---------------------------------");
         }
+        System.out.println("----------------------------------------");
     }
+
+    private static void hizliKisiAraEpostaVeYazdir() {
+        System.out.print("Aranacak E-Posta Adresini Girin: ");
+        String ePosta = scanner.nextLine();
+
+
+        Kisi bulunanKisi = manager.hizliKisiAraEposta(ePosta);
+
+        System.out.println("\n--- E-POSTA ARAMA SONUCU ---");
+        if (bulunanKisi != null) {
+            System.out.println("Kişi Başarıyla Bulundu:");
+            System.out.println(bulunanKisi);
+        } else {
+            System.out.println("HATA: '" + ePosta + "' e-posta adresiyle kayıt bulunamadı.");
+        }
+        System.out.println("----------------------------------");
+    }
+
 
     private static void kisiSil() {
         System.out.println("\n--- Kişi Silme ---");

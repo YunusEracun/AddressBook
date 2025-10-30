@@ -23,6 +23,10 @@ public class AdresDefteriService {
         this.defter = new HashMap<>();
     }
 
+    public Kisi hizliKisiAraEposta(String ePosta) {
+        return defter.get(ePosta.toLowerCase());
+    }
+
     private boolean epostaDogrula(String ePosta) {
         if (ePosta == null || ePosta.trim().isEmpty()) {
             return false;
@@ -110,6 +114,40 @@ public class AdresDefteriService {
         }
         System.out.println("HATA: " + ePosta + " adresine sahip bir kişi bulunamadı.");
         return false;
+    }
+
+    public Collection<Kisi> kisiAraGenel(String arananDeger, String aramaTipi) {
+        Collection<Kisi> bulunanKisiler = new java.util.ArrayList<>();
+        String kucukAranan = arananDeger.toLowerCase();
+
+        for (Kisi kisi : defter.values()) {
+            boolean eslesti = false;
+
+            // Hangi alana bakılacağını aramaTipi belirler.
+            switch (aramaTipi.toLowerCase()) {
+                case "ad":
+                    if (kisi.getAd().toLowerCase().contains(kucukAranan)) {
+                        eslesti = true;
+                    }
+                    break;
+                case "soyisim":
+                    if (kisi.getSoyad().toLowerCase().contains(kucukAranan)) {
+                        eslesti = true;
+                    }
+                    break;
+                case "telefon":
+                    // Telefon aramalarında kısmi eşleşme kontrolü
+                    if (kisi.getTelefonNumarasi().contains(kucukAranan)) {
+                        eslesti = true;
+                    }
+                    break;
+            }
+
+            if (eslesti) {
+                bulunanKisiler.add(kisi);
+            }
+        }
+        return bulunanKisiler;
     }
 
     public Collection<Kisi> mukerrerAdSoyadBul() {

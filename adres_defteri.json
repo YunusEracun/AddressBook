@@ -1,8 +1,20 @@
 {
+  "Ahmet@hotmail.com": {
+    "ad": "Ahmet",
+    "soyad": "Ahmet",
+    "telefonNumarasi": "5331231322",
+    "ePosta": "Ahmet@hotmail.com"
+  },
   "yunus@gmail.com": {
     "ad": "yunus",
     "soyad": "emre",
     "telefonNumarasi": "5335335252",
     "ePosta": "yunus@gmail.com"
+  },
+  "Yunusemre@gmail.com": {
+    "ad": "Yunus",
+    "soyad": "Emre",
+    "telefonNumarasi": "5319939234",
+    "ePosta": "Yunusemre@gmail.com"
   }
 }
