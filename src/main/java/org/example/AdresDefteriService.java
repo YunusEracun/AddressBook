@@ -125,11 +125,15 @@ public class AdresDefteriService {
                 this.defter = yuklenenDefter;
                 System.out.println("BAŞARILI: Adres defterine " + defter.size() + " kişi yüklendi.");
                 return true;
+            } else {
+                System.out.println("BİLGİ: Kayıt dosyası boş veya okunamadı. Yeni boş defter kullanılıyor.");
+                return false;
             }
-            return false;
 
-        } catch (IOException e) {
-            System.err.println("HATA: Veri yükleme sırasında bir hata oluştu: " + e.getMessage());
+
+        } catch (Exception e) {
+            System.err.println("KRİTİK HATA: Veri yükleme sırasında bir okuma/format hatası oluştu. Dosya bozuk olabilir. Hata: " + e.getMessage());
+
             return false;
         }
     }
