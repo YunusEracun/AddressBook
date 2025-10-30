@@ -9,6 +9,11 @@ import com.google.gson.reflect.TypeToken;
 
 public class AdresDefteriService {
 
+    private static final int GECERLI_TELEFON_UZUNLUGU = 10;
+
+    private static final String[] GECERLI_EMAIL_DOMAINLERI =
+            { "@hotmail.com", "@gmail.com", "@outlook.com" };
+
     private Map<String, Kisi> defter;
 
     private static final String DOSYA_ADRES = "adres_defteri.json";
@@ -18,8 +23,44 @@ public class AdresDefteriService {
         this.defter = new HashMap<>();
     }
 
+    private boolean epostaDogrula(String ePosta) {
+        if (ePosta == null || ePosta.trim().isEmpty()) {
+            return false;
+        }
+        String kucukHarfliEPosta = ePosta.toLowerCase();
+
+        for (String domain : GECERLI_EMAIL_DOMAINLERI) {
+            if (kucukHarfliEPosta.endsWith(domain)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean telefonUzunluguDogrula(String telefonNumarasi) {
+        if (telefonNumarasi == null) {
+            return false;
+        }
+        // Girilen numaradan sadece rakamları alır
+        String temizNumara = telefonNumarasi.replaceAll("[^0-9]", "");
+        return temizNumara.length() == GECERLI_TELEFON_UZUNLUGU;
+    }
+
+
     public boolean kisiEkleme(Kisi yeniKisi) {
-        String anahtar = yeniKisi.getePosta();
+        String anahtar = yeniKisi.getEPosta();
+
+        if (!epostaDogrula(yeniKisi.getEPosta())) {
+            System.out.println("HATA: E-posta adresi geçerli bir alana sahip değil. ("
+                    + String.join(", ", GECERLI_EMAIL_DOMAINLERI) + " gibi alanlar kullanın)");
+            return false;
+        }
+
+        if (!telefonUzunluguDogrula(yeniKisi.getTelefonNumarasi())) {
+            System.out.println("HATA: Telefon numarası "
+                    + GECERLI_TELEFON_UZUNLUGU + " haneli olmalıdır.");
+            return false;
+        }
 
         if (defter.containsKey(anahtar)) {
             System.out.println("HATA: Bu E-Posta (" + anahtar + ")adresi zaten kayıtlı.");
@@ -117,9 +158,9 @@ public class AdresDefteriService {
             Gson gson = new Gson();
 
             Type mapTipi = new TypeToken<HashMap<String, Kisi>>() {
-            }.getType();
+            }.getType(); //deftere yazdırdıgmız veriler veri tiplerını kaybeder, geri kazandırmak ıcın bu methodu kullandık
 
-            Map<String, Kisi> yuklenenDefter = gson.fromJson(reader, mapTipi);
+            Map<String, Kisi> yuklenenDefter = gson.fromJson(reader, mapTipi);  //önceden deftere yazdırdıgımız json verileri tekrar belleğe gson olarak döndürüyoruz
 
             if (yuklenenDefter != null) {
                 this.defter = yuklenenDefter;

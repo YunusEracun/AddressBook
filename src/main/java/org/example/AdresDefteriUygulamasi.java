@@ -83,14 +83,14 @@ public class AdresDefteriUygulamasi {
     }
 
     private static void yeniKisiEkle() {
-        System.out.println("\n--- Yeni Kişi Ekleme ---");
+        System.out.println("/n--- Yeni Kişi Ekleme ---");
         System.out.print("Adı: ");
         String ad = scanner.nextLine();
         System.out.print("Soyadı: ");
         String soyad = scanner.nextLine();
         System.out.print("Telefon Numarası: ");
         String telefon = scanner.nextLine();
-        System.out.print("E-posta Adresi (Benzersiz Olmalı): ");
+        System.out.print("E-posta Adresi: ");
         String ePosta = scanner.nextLine();
 
         Kisi yeniKisi = new Kisi(ad, soyad, telefon, ePosta);
