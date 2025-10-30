@@ -151,19 +151,31 @@ public class AdresDefteriService {
     }
 
     public Collection<Kisi> mukerrerAdSoyadBul() {
-        Set<String> gorulmusAdSoyadlar = new HashSet<>();
-        Collection<Kisi> mukerrerKisiler = new java.util.ArrayList<>();
+        // 1. Frekans Haritası: Anahtar (İsimSoyisim) -> Değer (O ismin kaç kez geçtiği)
+        Map<String, Integer> frekansHaritasi = new HashMap<>();
+        Collection<Kisi> tumMukerrerler = new java.util.ArrayList<>();
 
+        // --- Aşama 1: Tüm isimlerin frekansını say ---
         for (Kisi kisi : defter.values()) {
-
+            // Kontrol anahtarını oluştur: "yunusemre"
             String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
-            // burda Set kullanarak aynı isim soyisimdeki kişileri listeye 2. ekleyişimizde  bunları tespit edebilmek ıcın kllandk
-            if (!gorulmusAdSoyadlar.add(anahtar)) {
-                mukerrerKisiler.add(kisi);
-            }
 
+            // merge metodu: Anahtarı bul, sayıyı 1 artır. Yoksa 1 ile başlat.
+            frekansHaritasi.merge(anahtar, 1, Integer::sum);
         }
-        return mukerrerKisiler;
+
+        // --- Aşama 2: Frekansı 1'den büyük olanları topla ---
+        for (Kisi kisi : defter.values()) {
+            String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
+
+            // Eğer bu ismin (anahtarın) frekansı 1'den büyükse (yani mükerrerse)...
+            if (frekansHaritasi.get(anahtar) > 1) {
+                // ...o kişiyi listeye ekle. Bu döngü her iki Yunus Emre'yi de ekler.
+                tumMukerrerler.add(kisi);
+            }
+        }
+
+        return tumMukerrerler;
     }
 
 
