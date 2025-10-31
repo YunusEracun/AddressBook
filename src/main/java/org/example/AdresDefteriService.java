@@ -3,12 +3,10 @@ package org.example;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import java.util.Comparator;
+
+import java.util.*;
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.example.Constants.*;
@@ -20,9 +18,11 @@ public class AdresDefteriService {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private Map<String, Kisi> defter;
+    private final Set<String> kullanilanTelefonlar;
 
     public AdresDefteriService() {
         this.defter = new HashMap<>();
+        this.kullanilanTelefonlar = new HashSet<>();
     }
 
     public Kisi hizliKisiAraEposta(String ePosta) {
@@ -31,10 +31,15 @@ public class AdresDefteriService {
 
     public boolean kisiEkleme(Kisi yeniKisi) {
         String anahtar = yeniKisi.getEPosta().toLowerCase();
+        String telefonNumarasi = yeniKisi.getTelefonNumarasi();
         String validationError = validateKisi(yeniKisi);
 
         if (validationError != null) {
             System.out.println(validationError);
+            return false;
+        }
+        if (kullanilanTelefonlar.contains(telefonNumarasi)) {
+            System.out.println("HATA: Bu telefon numarası (" + telefonNumarasi + ") zaten kayıtlı.");
             return false;
         }
 
@@ -44,6 +49,7 @@ public class AdresDefteriService {
         }
 
         defter.put(anahtar, yeniKisi);
+        kullanilanTelefonlar.add(telefonNumarasi);
         System.out.println("BAŞARILI: " + yeniKisi.getAd() + " kişisi adres defterine eklendi.");
         return true;
     }
@@ -67,6 +73,7 @@ public class AdresDefteriService {
         String anahtar = ePosta.toLowerCase();
         if (defter.containsKey(anahtar)) {
             Kisi silinenKisi = defter.remove(anahtar);
+            kullanilanTelefonlar.remove(silinenKisi.getTelefonNumarasi());
             System.out.println("BAŞARILI: " + silinenKisi.getAd() + " kişisi silindi.");
             return true;
         }
@@ -139,6 +146,10 @@ public class AdresDefteriService {
 
             if (yuklenenDefter != null) {
                 this.defter = yuklenenDefter;
+                this.kullanilanTelefonlar.clear();
+                for (Kisi kisi : defter.values()) {
+                    this.kullanilanTelefonlar.add(kisi.getTelefonNumarasi());
+                }
                 System.out.println("BAŞARILI: Adres defterine " + defter.size() + " kişi yüklendi.");
                 return true;
             } else {
