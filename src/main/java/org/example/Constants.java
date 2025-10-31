@@ -17,15 +17,30 @@ public final class Constants {
 
 
 
-    // --- HATA VE BİLGİ MESAJLARI ---
-
-    public static final String ERR_EPOSTA =
-            "HATA: E-posta adresi geçerli bir alana sahip değil. (%s gibi alanlar kullanın)";
-
-    public static final String ERR_TELEFON =
-            "HATA: Telefon numarası " + GECERLI_TELEFON_UZUNLUGU + " haneli olmalıdır.";
-
-    public static final String ERR_MEVCUT =
+    public static final String MSG_HATA_EPOSTA_MUKERRER =
             "HATA: Bu E-Posta (%s) adresi zaten kayıtlı.";
 
+    public static final String MSG_HATA_TELEFON_MUKERRER =
+            "HATA: Bu telefon numarası (%s) zaten kayıtlı."; // (Yeni kuralın mesajı)
+
+    public static final String MSG_HATA_EPOSTA_GECERSIZ =
+            "HATA: E-posta adresi geçerli bir alana sahip değil. (%s gibi alanlar kullanın)";
+
+    public static final String MSG_HATA_TELEFON_GECERSIZ =
+            "HATA: Telefon numarası " + GECERLI_TELEFON_UZUNLUGU + " haneli olmalıdır.";
+
+    public static final String MSG_BASARILI_EKLEME =
+            "BAŞARILI: %s kişisi adres defterine eklendi."; // %s = Kişinin Adı
+
+    public static final String MSG_BASARILI_SILME =
+            "BAŞARILI: %s kişisi silindi."; // %s = Kişinin Adı
+
+    public static final String MSG_BILGI_YUKLEME_YOK =
+            "BİLGİ: Kayıt dosyası bulunamadı. Yeni boş defter oluşturuldu";
+
+    public static final String MSG_BILGI_KAYIT_BULUNAMADI =
+            "BİLGİ: Aranan kriterlere uygun kayıt bulunamadı.";
+
+    public static final String MSG_HATA_KAYIT_SIRASINDA =
+            "HATA: Veri kaydı sırasında bir hata oluştu. Hata: %s"; // %s = e.getMessage()
 }

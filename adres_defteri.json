@@ -11,12 +11,6 @@
     "telefonNumarasi": "5335335252",
     "ePosta": "yunus@gmail.com"
   },
-  "telefon@outlook.com": {
-    "ad": "telefon",
-    "soyad": "telefon",
-    "telefonNumarasi": "1234567899",
-    "ePosta": "telefon@outlook.com"
-  },
   "Yunusemre@gmail.com": {
     "ad": "Yunus",
     "soyad": "Emre",
@@ -34,6 +28,12 @@
     "soyad": "EMRE",
     "telefonNumarasi": "1929399393",
     "ePosta": "yunuss@gmail.com"
+  },
+  "bilal@hotmail.com": {
+    "ad": "bilal",
+    "soyad": "akyüz",
+    "telefonNumarasi": "2223334455",
+    "ePosta": "bilal@hotmail.com"
   },
   "ahmett@gmail.com": {
     "ad": "ahmet",

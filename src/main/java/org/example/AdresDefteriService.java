@@ -29,29 +29,26 @@ public class AdresDefteriService {
         return defter.get(ePosta.toLowerCase());
     }
 
-    public boolean kisiEkleme(Kisi yeniKisi) {
+    public IslemSonucu kisiEkleme(Kisi yeniKisi) {
         String anahtar = yeniKisi.getEPosta().toLowerCase();
         String telefonNumarasi = yeniKisi.getTelefonNumarasi();
-        String validationError = validateKisi(yeniKisi);
 
-        if (validationError != null) {
-            System.out.println(validationError);
-            return false;
+        IslemSonucu validationResult = validateKisi(yeniKisi);
+        if (validationResult != null) {
+            return validationResult;
         }
         if (kullanilanTelefonlar.contains(telefonNumarasi)) {
-            System.out.println("HATA: Bu telefon numarası (" + telefonNumarasi + ") zaten kayıtlı.");
-            return false;
+            return IslemSonucu.HATA_TELEFON_MUKERRER;
         }
 
         if (defter.containsKey(anahtar)) {
-            System.out.println(String.format(ERR_MEVCUT, anahtar));
-            return false;
+            return IslemSonucu.HATA_EPOSTA_MUKERRER;
         }
 
         defter.put(anahtar, yeniKisi);
         kullanilanTelefonlar.add(telefonNumarasi);
-        System.out.println("BAŞARILI: " + yeniKisi.getAd() + " kişisi adres defterine eklendi.");
-        return true;
+
+        return IslemSonucu.BASARILI_EKLEME;
     }
 
     public void tumKisileriListele() {
@@ -163,18 +160,16 @@ public class AdresDefteriService {
         }
     }
 
-    private String validateKisi(Kisi kisi) {
+    private IslemSonucu validateKisi(Kisi kisi) {
         String eposta = kisi.getEPosta();
         String telefon = kisi.getTelefonNumarasi();
 
         if (!epostaDogrula(eposta)) {
-            // Hata mesajını formatlayarak tek bir yerde tutma
-            String gecerliDomainler = String.join(", ", GECERLI_EMAIL_DOMAINLERI);
-            return String.format(ERR_EPOSTA, gecerliDomainler);
+            return IslemSonucu.HATA_EPOSTA_GECERSIZ;
         }
 
         if (!telefonUzunluguDogrula(telefon)) {
-            return ERR_TELEFON;
+            return IslemSonucu.HATA_TELEFON_GECERSIZ;
         }
         return null;
     }
