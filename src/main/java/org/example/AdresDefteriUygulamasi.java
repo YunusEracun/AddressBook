@@ -62,27 +62,6 @@ public class AdresDefteriUygulamasi {
         }
     }
 
-    private static void mukerrerKontrol() {
-        Collection<Kisi> mukerrerler = manager.mukerrerAdSoyadBul();
-        System.out.println("\n--- MÜKERRER KAYITLAR ---");
-        if (mukerrerler.isEmpty()) {
-            System.out.println("Mükerrer kayıt bulunamadı.");
-        } else {
-            System.out.println(mukerrerler.size() + " adet mükerrer kayıt bulundu:");
-            for (Kisi k : mukerrerler) {
-                System.out.println(k);
-            }
-        }
-    }
-
-    private static void jsonCiktiGoster() {
-        String jsonCikti = manager.defteriJsonaCevir();
-        System.out.println("\n--- JSON ÇIKTISI ---");
-        System.out.println(jsonCikti);
-        System.out.println("--------------------");
-    }
-
-
     private static void yeniKisiEkle() {
         System.out.println("\n--- Yeni Kişi Ekleme ---");
 
@@ -105,7 +84,7 @@ public class AdresDefteriUygulamasi {
                 break;
 
             case HATA_EPOSTA_GECERSIZ:
-                // %s yerine geçerli domain listesi gönderilir (Constants'tan çekiliyor olmalı)
+                //yerine geçerli domain listesi gönderilir (Constants'tan çekiliyor olmalı)
                 String domainler = String.join(", ", Constants.GECERLI_EMAIL_DOMAINLERI);
                 mesajYazdir(sonuc, domainler);
                 break;
@@ -163,6 +142,32 @@ public class AdresDefteriUygulamasi {
         }
     }
 
+    private static void kisiSil() {
+        System.out.println("\n--- Kişi Silme ---");
+        String ePosta = inputManager.getStringInput("Silmek istediğiniz kişinin E-posta adresini girin: ");
+        manager.kisiSil(ePosta);
+    }
+
+    private static void mukerrerKontrol() {
+        Collection<Kisi> mukerrerler = manager.mukerrerAdSoyadBul();
+        System.out.println("\n--- MÜKERRER KAYITLAR ---");
+        if (mukerrerler.isEmpty()) {
+            System.out.println("Mükerrer kayıt bulunamadı.");
+        } else {
+            System.out.println(mukerrerler.size() + " adet mükerrer kayıt bulundu:");
+            for (Kisi k : mukerrerler) {
+                System.out.println(k);
+            }
+        }
+    }
+
+    private static void jsonCiktiGoster() {
+        String jsonCikti = manager.defteriJsonaCevir();
+        System.out.println("\n--- JSON ÇIKTISI ---");
+        System.out.println(jsonCikti);
+        System.out.println("--------------------");
+    }
+
     private static void kisiAraVeYazdir(String aramaTipi) {
         String arananDeger = inputManager.getStringInput("Aranacak " + aramaTipi + " değerini girin: ");
         Collection<Kisi> sonuclar = manager.kisiAra(arananDeger, aramaTipi);
@@ -195,11 +200,7 @@ public class AdresDefteriUygulamasi {
     }
 
 
-    private static void kisiSil() {
-        System.out.println("\n--- Kişi Silme ---");
-        String ePosta = inputManager.getStringInput("Silmek istediğiniz kişinin E-posta adresini girin: ");
-        manager.kisiSil(ePosta);
-    }
+
     private static void mesajYazdir(IslemSonucu sonuc, String... args) {
         String mesajSablonu = "";
 

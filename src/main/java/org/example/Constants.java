@@ -15,7 +15,7 @@ public final class Constants {
 
     public static final String DOSYA_ADRES = "adres_defteri.json";
 
-
+    // Sonuç mesajları
 
     public static final String MSG_HATA_EPOSTA_MUKERRER =
             "HATA: Bu E-Posta (%s) adresi zaten kayıtlı.";
