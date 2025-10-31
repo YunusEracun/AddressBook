@@ -1,25 +1,27 @@
 package org.example;
-import java.io.*;
-import java.lang.reflect.Type;
-import java.util.*;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import java.util.Comparator;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.example.Constants.*;
 
 
 public class AdresDefteriService {
 
-    private static final int GECERLI_TELEFON_UZUNLUGU = 10;
 
-    private static final String[] GECERLI_EMAIL_DOMAINLERI =
-            { "@hotmail.com", "@gmail.com", "@outlook.com" };
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private Map<String, Kisi> defter;
 
-    private static final String DOSYA_ADRES = "adres_defteri.json";
-
     public AdresDefteriService() {
-
         this.defter = new HashMap<>();
     }
 
@@ -27,8 +29,147 @@ public class AdresDefteriService {
         return defter.get(ePosta.toLowerCase());
     }
 
+    public boolean kisiEkleme(Kisi yeniKisi) {
+        String anahtar = yeniKisi.getEPosta().toLowerCase();
+        String validationError = validateKisi(yeniKisi);
+
+        if (validationError != null) {
+            System.out.println(validationError);
+            return false;
+        }
+
+        if (defter.containsKey(anahtar)) {
+            System.out.println(String.format(ERR_MEVCUT, anahtar));
+            return false;
+        }
+
+        defter.put(anahtar, yeniKisi);
+        System.out.println("BAŞARILI: " + yeniKisi.getAd() + " kişisi adres defterine eklendi.");
+        return true;
+    }
+
+    public void tumKisileriListele() {
+        if (defter.isEmpty()) {
+            System.out.println("Adres defteri şu anda boş.");
+            return;
+        }
+
+        System.out.println("\n--- Adres Defteri Listesi (" + defter.size() + " Kişi)---");
+
+        defter.values().stream()
+                .sorted(Comparator.comparing(Kisi::getAd)) // Ada göre sıralama
+                .forEach(System.out::println);
+
+        System.out.println("-------------------------------");
+    }
+
+    public boolean kisiSil(String ePosta) {
+        String anahtar = ePosta.toLowerCase();
+        if (defter.containsKey(anahtar)) {
+            Kisi silinenKisi = defter.remove(anahtar);
+            System.out.println("BAŞARILI: " + silinenKisi.getAd() + " kişisi silindi.");
+            return true;
+        }
+        System.out.println("HATA: " + ePosta + " adresine sahip bir kişi bulunamadı.");
+        return false;
+    }
+
+    public Collection<Kisi> kisiAra(String arananDeger, String aramaTipi) {
+        String kucukAranan = arananDeger.toLowerCase();
+        return defter.values().stream()
+                .filter(kisi -> {
+                    switch (aramaTipi.toLowerCase()) {
+                        case "ad":
+                            return kisi.getAd().toLowerCase().contains(kucukAranan);
+                        case "soyisim":
+                            return kisi.getSoyad().toLowerCase().contains(kucukAranan);
+                        case "telefon":
+                            // Telefon aramalarında kısmi eşleşme kontrolü
+                            return kisi.getTelefonNumarasi().contains(arananDeger);
+                        default:
+                            return false;
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    public Collection<Kisi> mukerrerAdSoyadBul() {
+        // GÜNCELLEME: Tekrar eden isimleri bulmak için daha kısa Stream API yaklaşımı.
+
+        // İsim+Soyisim'i bir anahtar olarak alıp frekansını say
+        Map<String, Long> frekansHaritasi = defter.values().stream()
+                .collect(Collectors.groupingBy(
+                        kisi -> (kisi.getAd() + kisi.getSoyad()).toLowerCase(),
+                        Collectors.counting()
+                ));
+
+        // Frekansı 1'den büyük olan (mükerrer) kişileri filtrele
+        return defter.values().stream()
+                .filter(kisi -> {
+                    String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
+                    return frekansHaritasi.getOrDefault(anahtar, 0L) > 1;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public String defteriJsonaCevir() {
+        return gson.toJson(defter.values());
+    }
+
+    public boolean verileriKaydet() {
+        try (FileWriter writer = new FileWriter(DOSYA_ADRES)) {
+            gson.toJson(defter, writer);
+            System.out.println("BAŞARILI: Adres defteri verileri dosyaya kaydedildi.");
+            return true;
+        } catch (IOException e) {
+            System.err.println("HATA: Veri kaydı sırasında bir hata oluştu. Hata: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean verileriYukle() {
+        File dosya = new File(DOSYA_ADRES);
+        if (!dosya.exists()) {
+            System.out.println("BİLGİ: Kayıt dosyası bulunamadı. Yeni boş defter oluşturuldu");
+            return false;
+        }
+        try (FileReader reader = new FileReader(DOSYA_ADRES)) {
+            Type mapTipi = new TypeToken<HashMap<String, Kisi>>() {}.getType();
+            Map<String, Kisi> yuklenenDefter = gson.fromJson(reader, mapTipi);
+
+            if (yuklenenDefter != null) {
+                this.defter = yuklenenDefter;
+                System.out.println("BAŞARILI: Adres defterine " + defter.size() + " kişi yüklendi.");
+                return true;
+            } else {
+                System.out.println("BİLGİ: Kayıt dosyası boş veya okunamadı. Yeni boş defter kullanılıyor.");
+                return false;
+            }
+
+        } catch (Exception e) {
+            System.err.println("KRİTİK HATA: Veri yükleme sırasında bir okuma/format hatası oluştu. Dosya bozuk olabilir. Hata: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private String validateKisi(Kisi kisi) {
+        String eposta = kisi.getEPosta();
+        String telefon = kisi.getTelefonNumarasi();
+
+        if (!epostaDogrula(eposta)) {
+            // Hata mesajını formatlayarak tek bir yerde tutma
+            String gecerliDomainler = String.join(", ", GECERLI_EMAIL_DOMAINLERI);
+            return String.format(ERR_EPOSTA, gecerliDomainler);
+        }
+
+        if (!telefonUzunluguDogrula(telefon)) {
+            return ERR_TELEFON;
+        }
+        return null;
+    }
+
     private boolean epostaDogrula(String ePosta) {
-        if (ePosta == null || ePosta.trim().isEmpty()) {
+        if (ePosta == null || (ePosta = ePosta.trim()).isEmpty()) {
             return false;
         }
         String kucukHarfliEPosta = ePosta.toLowerCase();
@@ -45,190 +186,7 @@ public class AdresDefteriService {
         if (telefonNumarasi == null) {
             return false;
         }
-        // Girilen numaradan sadece rakamları alır
         String temizNumara = telefonNumarasi.replaceAll("[^0-9]", "");
         return temizNumara.length() == GECERLI_TELEFON_UZUNLUGU;
     }
-
-
-    public boolean kisiEkleme(Kisi yeniKisi) {
-        String anahtar = yeniKisi.getEPosta();
-
-        if (!epostaDogrula(yeniKisi.getEPosta())) {
-            System.out.println("HATA: E-posta adresi geçerli bir alana sahip değil. ("
-                    + String.join(", ", GECERLI_EMAIL_DOMAINLERI) + " gibi alanlar kullanın)");
-            return false;
-        }
-
-        if (!telefonUzunluguDogrula(yeniKisi.getTelefonNumarasi())) {
-            System.out.println("HATA: Telefon numarası "
-                    + GECERLI_TELEFON_UZUNLUGU + " haneli olmalıdır.");
-            return false;
-        }
-
-        if (defter.containsKey(anahtar)) {
-            System.out.println("HATA: Bu E-Posta (" + anahtar + ")adresi zaten kayıtlı.");
-            return false;
-        }
-
-        defter.put(anahtar, yeniKisi);
-        System.out.println("BAŞARILI: " + yeniKisi.getAd() + "kişisi adres defterine eklendi");
-        return true;
-    }
-
-    public void tumKisileriListele() {
-        if (defter.isEmpty()) {
-            System.out.println("Adres defteri şu anda boş.");
-            return;
-        }
-
-        System.out.println("/n--- Adres Defteri Listesi (" + defter.size() + " Kişi)---");
-
-        for (Kisi kisi : defter.values()) {
-            System.out.println(kisi);
-        }
-        System.out.println("-------------------------------");
-    }
-
-    public Collection<Kisi> kisiAra(String aramaMetni) {
-        Collection<Kisi> bulunanlar = new java.util.ArrayList<>();
-        String aramaKucuk = aramaMetni.toLowerCase();
-
-        for (Kisi kisi : defter.values()) {
-
-            if (kisi.getAd().toLowerCase().contains(aramaKucuk) ||
-                    kisi.getSoyad().toLowerCase().contains(aramaKucuk) ||
-                    kisi.getTelefonNumarasi().contains(aramaMetni)) {
-                bulunanlar.add(kisi);
-            }
-
-        }
-        return bulunanlar;
-    }
-
-    public boolean kisiSil(String ePosta) {
-        if (defter.containsKey(ePosta)) {
-            Kisi silinenKisi = defter.remove(ePosta);
-            System.out.println("BAŞARILI: " + silinenKisi.getAd() + " kişisi silindi.");
-            return true;
-        }
-        System.out.println("HATA: " + ePosta + " adresine sahip bir kişi bulunamadı.");
-        return false;
-    }
-
-    public Collection<Kisi> kisiAraGenel(String arananDeger, String aramaTipi) {
-        Collection<Kisi> bulunanKisiler = new java.util.ArrayList<>();
-        String kucukAranan = arananDeger.toLowerCase();
-
-        for (Kisi kisi : defter.values()) {
-            boolean eslesti = false;
-
-            // Hangi alana bakılacağını aramaTipi belirler.
-            switch (aramaTipi.toLowerCase()) {
-                case "ad":
-                    if (kisi.getAd().toLowerCase().contains(kucukAranan)) {
-                        eslesti = true;
-                    }
-                    break;
-                case "soyisim":
-                    if (kisi.getSoyad().toLowerCase().contains(kucukAranan)) {
-                        eslesti = true;
-                    }
-                    break;
-                case "telefon":
-                    // Telefon aramalarında kısmi eşleşme kontrolü
-                    if (kisi.getTelefonNumarasi().contains(kucukAranan)) {
-                        eslesti = true;
-                    }
-                    break;
-            }
-
-            if (eslesti) {
-                bulunanKisiler.add(kisi);
-            }
-        }
-        return bulunanKisiler;
-    }
-
-    public Collection<Kisi> mukerrerAdSoyadBul() {
-        // 1. Frekans Haritası: Anahtar (İsimSoyisim) -> Değer (O ismin kaç kez geçtiği)
-        Map<String, Integer> frekansHaritasi = new HashMap<>();
-        Collection<Kisi> tumMukerrerler = new java.util.ArrayList<>();
-
-        // --- Aşama 1: Tüm isimlerin frekansını say ---
-        for (Kisi kisi : defter.values()) {
-            // Kontrol anahtarını oluştur: "yunusemre"
-            String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
-
-            // merge metodu: Anahtarı bul, sayıyı 1 artır. Yoksa 1 ile başlat.
-            frekansHaritasi.merge(anahtar, 1, Integer::sum);
-        }
-
-        // --- Aşama 2: Frekansı 1'den büyük olanları topla ---
-        for (Kisi kisi : defter.values()) {
-            String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();
-
-            // Eğer bu ismin (anahtarın) frekansı 1'den büyükse (yani mükerrerse)...
-            if (frekansHaritasi.get(anahtar) > 1) {
-                // ...o kişiyi listeye ekle. Bu döngü her iki Yunus Emre'yi de ekler.
-                tumMukerrerler.add(kisi);
-            }
-        }
-
-        return tumMukerrerler;
-    }
-
-
-    public String defteriJsonaCevir() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        return gson.toJson(defter);
-    }
-
-    public boolean verileriKaydet() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        try (FileWriter writer = new FileWriter(DOSYA_ADRES)) {
-            gson.toJson(defter, writer);
-            System.out.println("BAŞARILI: Adres defteri verileri dosyaya kaydedildi.");
-            return true;
-        } catch (IOException e) {
-            System.out.println("HATA: Veri kaydı sırasında bir hata oluştu.");
-            return false;
-        }
-    }
-
-    public boolean verileriYukle() {
-        File dosya = new File(DOSYA_ADRES);
-        if (!dosya.exists()) {
-            System.out.println("BİLGİ: Kayıt dosyası bulunamadı. Yeni boş defter oluşturuldu");
-            return false;
-        }
-        try (FileReader reader = new FileReader(DOSYA_ADRES)) {
-            Gson gson = new Gson();
-
-            Type mapTipi = new TypeToken<HashMap<String, Kisi>>() {
-            }.getType(); //deftere yazdırdıgmız veriler veri tiplerını kaybeder, geri kazandırmak ıcın bu methodu kullandık
-
-            Map<String, Kisi> yuklenenDefter = gson.fromJson(reader, mapTipi);  //önceden deftere yazdırdıgımız json verileri tekrar belleğe gson olarak döndürüyoruz
-
-            if (yuklenenDefter != null) {
-                this.defter = yuklenenDefter;
-                System.out.println("BAŞARILI: Adres defterine " + defter.size() + " kişi yüklendi.");
-                return true;
-            } else {
-                System.out.println("BİLGİ: Kayıt dosyası boş veya okunamadı. Yeni boş defter kullanılıyor.");
-                return false;
-            }
-
-
-        } catch (Exception e) {
-            System.err.println("KRİTİK HATA: Veri yükleme sırasında bir okuma/format hatası oluştu. Dosya bozuk olabilir. Hata: " + e.getMessage());
-
-            return false;
-        }
-    }
 }
-
-
-

@@ -1,33 +1,23 @@
 package org.example;
 
-import java.util.Scanner;
 import java.util.Collection;
+import java.util.Scanner;
 
 public class AdresDefteriUygulamasi {
 
     private static AdresDefteriService manager = new AdresDefteriService();
     private static Scanner scanner = new Scanner(System.in);
+    private static InputManager inputManager = InputManager.getInstance(scanner);
+
 
     public static void main(String[] args) {
         manager.verileriYukle();
         System.out.println("--- Konsol Tabanlı Adres Defteri Uygulamasına Hoş Geldiniz ---");
-        int secim;
-
-        do {
+        while (true) {
             menuGoster();
-            System.out.print("Seçiminizi yapın (1-8): ");
-            if (scanner.hasNextInt()) {
-                secim = scanner.nextInt();
-                scanner.nextLine();
-                islemYap(secim);
-            } else {
-                System.out.println("Geçersiz giriş. Lütfen bir sayı girin.");
-                scanner.nextLine();
-
-            }
-        }   while (true);
-
-
+            int secim = inputManager.getIntInput("Seçiminizi yapın (1-7): ");
+            islemYap(secim);
+        }
     }
 
     private static void menuGoster() {
@@ -36,9 +26,9 @@ public class AdresDefteriUygulamasi {
         System.out.println("2. Tüm Kişileri Listele");
         System.out.println("3. Kişi Ara (Ad/Soyad/Telefon)");
         System.out.println("4. Kişi Sil (E-posta ile)");
-        System.out.println("5. Mükerrer Ad/Soyadları Bul (Veri Analizi)");
+        System.out.println("5. Mükerrer Ad/Soyadları Bul");
         System.out.println("6. Verileri JSON Olarak Konsola Yazdır");
-        System.out.println("7. GÜVENLİ ÇIKIŞ ve KAYDET (Zorunlu)");
+        System.out.println("7. GÜVENLİ ÇIKIŞ ve KAYDET");
         System.out.println("------------");
     }
 
@@ -57,64 +47,62 @@ public class AdresDefteriUygulamasi {
                 kisiSil();
                 break;
             case 5:
-                Collection<Kisi> mukerrerler = manager.mukerrerAdSoyadBul();
-
-                System.out.println("\n--- MÜKERRER KAYITLAR ---");
-                if (mukerrerler.isEmpty()) {
-                    System.out.println("Mükerrer kayıt bulunamadı.");
-                } else {
-                    for (Kisi k : mukerrerler) {
-                        System.out.println(k);
-                    }
-                }
+                mukerrerKontrol();
                 break;
             case 6:
-                String jsonCikti = manager.defteriJsonaCevir();
-                System.out.println("\n--- JSON ÇIKTISI ---");
-                System.out.println(jsonCikti);
+                jsonCiktiGoster();
                 break;
             case 7:
                 System.out.println("Uygulamadan çıkılıyor. Veriler kaydediliyor...");
                 manager.verileriKaydet();
                 System.exit(0);
+                break;
             default:
                 System.out.println("Geçersiz seçim. Lütfen menüdeki rakamlardan birini girin.");
         }
     }
 
+    private static void mukerrerKontrol() {
+        Collection<Kisi> mukerrerler = manager.mukerrerAdSoyadBul();
+        System.out.println("\n--- MÜKERRER KAYITLAR ---");
+        if (mukerrerler.isEmpty()) {
+            System.out.println("Mükerrer kayıt bulunamadı.");
+        } else {
+            System.out.println(mukerrerler.size() + " adet mükerrer kayıt bulundu:");
+            for (Kisi k : mukerrerler) {
+                System.out.println(k);
+            }
+        }
+    }
+
+    private static void jsonCiktiGoster() {
+        String jsonCikti = manager.defteriJsonaCevir();
+        System.out.println("\n--- JSON ÇIKTISI ---");
+        System.out.println(jsonCikti);
+        System.out.println("--------------------");
+    }
+
+
     private static void yeniKisiEkle() {
-        System.out.println("/n--- Yeni Kişi Ekleme ---");
-        System.out.print("Adı: ");
-        String ad = scanner.nextLine();
-        System.out.print("Soyadı: ");
-        String soyad = scanner.nextLine();
-        System.out.print("Telefon Numarası: ");
-        String telefon = scanner.nextLine();
-        System.out.print("E-posta Adresi: ");
-        String ePosta = scanner.nextLine();
+        System.out.println("\n--- Yeni Kişi Ekleme ---");
+        String ad = inputManager.getStringInput("Adı: ");
+        String soyad = inputManager.getStringInput("Soyadı: ");
+        String telefon = inputManager.getStringInput("Telefon Numarası: ");
+        String ePosta = inputManager.getStringInput("E-posta Adresi: ");
 
         Kisi yeniKisi = new Kisi(ad, soyad, telefon, ePosta);
         manager.kisiEkleme(yeniKisi);
     }
 
     private static void kisiAramaMenu() {
-        int altSecim = -1;
         System.out.println("\n--- ARAMA TİPİ SEÇİMİ ---");
         System.out.println("1. İsim ile Ara");
         System.out.println("2. Soyisim ile Ara");
         System.out.println("3. Telefon Numarası ile Ara");
         System.out.println("4. E-Posta ile Hızlı Ara");
         System.out.println("0. Geri");
-        System.out.print("Seçiminiz: ");
 
-        if (scanner.hasNextInt()) {
-            altSecim = scanner.nextInt();
-            scanner.nextLine();
-        } else {
-            System.out.println("Geçersiz giriş. Lütfen bir rakam girin.");
-            scanner.nextLine();
-            return;
-        }
+        int altSecim = inputManager.getIntInput("Seçiminiz (0-4): ");
 
         switch (altSecim) {
             case 1:
@@ -136,11 +124,10 @@ public class AdresDefteriUygulamasi {
                 System.out.println("Geçersiz seçim.");
         }
     }
+
     private static void kisiAraVeYazdir(String aramaTipi) {
-        String arananDeger;
-        System.out.print("Aranacak " + aramaTipi + " değerini girin: ");
-        arananDeger = scanner.nextLine();
-        Collection<Kisi> sonuclar = manager.kisiAraGenel(arananDeger, aramaTipi);
+        String arananDeger = inputManager.getStringInput("Aranacak " + aramaTipi + " değerini girin: ");
+        Collection<Kisi> sonuclar = manager.kisiAra(arananDeger, aramaTipi);
 
         System.out.println("\n--- ARAMA SONUÇLARI (" + aramaTipi.toUpperCase() + ") ---");
         if (sonuclar.isEmpty()) {
@@ -155,9 +142,7 @@ public class AdresDefteriUygulamasi {
     }
 
     private static void hizliKisiAraEpostaVeYazdir() {
-        System.out.print("Aranacak E-Posta Adresini Girin: ");
-        String ePosta = scanner.nextLine();
-
+        String ePosta = inputManager.getStringInput("Aranacak E-Posta Adresini Girin: ");
 
         Kisi bulunanKisi = manager.hizliKisiAraEposta(ePosta);
 
@@ -174,8 +159,7 @@ public class AdresDefteriUygulamasi {
 
     private static void kisiSil() {
         System.out.println("\n--- Kişi Silme ---");
-        System.out.print("Silmek istediğiniz kişinin E-posta adresini girin: ");
-        String ePosta = scanner.nextLine();
+        String ePosta = inputManager.getStringInput("Silmek istediğiniz kişinin E-posta adresini girin: ");
         manager.kisiSil(ePosta);
     }
 }
