@@ -98,9 +98,6 @@ public class AdresDefteriService {
     }
 
     public Collection<Kisi> mukerrerAdSoyadBul() {
-        // GÜNCELLEME: Tekrar eden isimleri bulmak için daha kısa Stream API yaklaşımı.
-
-        // İsim+Soyisim'i bir anahtar olarak alıp frekansını say
         Map<String, Long> frekansHaritasi = defter.values().stream()
                 .collect(Collectors.groupingBy(
                         kisi -> (kisi.getAd() + kisi.getSoyad()).toLowerCase(),

@@ -65,7 +65,7 @@ public class AdresDefteriUygulamasi {
     private static void yeniKisiEkle() {
         System.out.println("\n--- Yeni Kişi Ekleme ---");
 
-        // NOT: Bu kısımda inputManager kullanıldığını varsayıyoruz.
+
         String ad = inputManager.getStringInput("Adı: ");
         String soyad = inputManager.getStringInput("Soyadı: ");
         String telefon = inputManager.getStringInput("Telefon Numarası: ");
@@ -73,39 +73,33 @@ public class AdresDefteriUygulamasi {
 
         Kisi yeniKisi = new Kisi(ad, soyad, telefon, ePosta);
 
-        // Service katmanı çağrılır ve sonuç alınır
+
         IslemSonucu sonuc = manager.kisiEkleme(yeniKisi);
 
-        // UI (Kullanıcı Arayüzü) katmanı, gelen sonuca göre ekrana çıktı basar
+
         switch (sonuc) {
             case BASARILI_EKLEME:
-                // %s yerine kişinin adını gönderir
                 mesajYazdir(sonuc, yeniKisi.getAd());
                 break;
 
             case HATA_EPOSTA_GECERSIZ:
-                //yerine geçerli domain listesi gönderilir (Constants'tan çekiliyor olmalı)
                 String domainler = String.join(", ", Constants.GECERLI_EMAIL_DOMAINLERI);
                 mesajYazdir(sonuc, domainler);
                 break;
 
             case HATA_TELEFON_GECERSIZ:
-                // Telefon hatası sabit bir mesaj olduğu için argüman göndermeye gerek yok
                 mesajYazdir(sonuc);
                 break;
 
             case HATA_EPOSTA_MUKERRER:
-                // %s yerine mükerrer olan e-postayı gönderir
                 mesajYazdir(sonuc, yeniKisi.getEPosta());
                 break;
 
             case HATA_TELEFON_MUKERRER:
-                // %s yerine mükerrer olan telefon numarasını gönderir
                 mesajYazdir(sonuc, yeniKisi.getTelefonNumarasi());
                 break;
 
             default:
-                // Yukarıdaki enum'lar dışında bir sonuç gelirse bilinmeyen hata bas
                 System.err.println("KRİTİK HATA: Beklenmeyen işlem sonucu: " + sonuc);
                 break;
         }
@@ -204,7 +198,6 @@ public class AdresDefteriUygulamasi {
     private static void mesajYazdir(IslemSonucu sonuc, String... args) {
         String mesajSablonu = "";
 
-        // Gelen sonuca göre Constants'tan uygun mesaj şablonunu seç
         switch (sonuc) {
             case BASARILI_EKLEME:
                 mesajSablonu = Constants.MSG_BASARILI_EKLEME;
