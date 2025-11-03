@@ -24,7 +24,7 @@ public class AdresDefteriUygulamasi {
         System.out.println("\n--- Menü ---");
         System.out.println("1. Yeni Kişi Ekle");
         System.out.println("2. Tüm Kişileri Listele");
-        System.out.println("3. Kişi Ara (Ad/Soyad/Telefon)");
+        System.out.println("3. Kişi Ara");
         System.out.println("4. Kişi Sil (E-posta ile)");
         System.out.println("5. Mükerrer Ad/Soyadları Bul");
         System.out.println("6. Verileri JSON Olarak Konsola Yazdır");
