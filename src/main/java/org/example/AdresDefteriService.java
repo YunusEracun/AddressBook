@@ -88,7 +88,6 @@ public class AdresDefteriService {
                         case "soyisim":
                             return kisi.getSoyad().toLowerCase().contains(kucukAranan);
                         case "telefon":
-                            // Telefon aramalarında kısmi eşleşme kontrolü
                             return kisi.getTelefonNumarasi().contains(arananDeger);
                         default:
                             return false;
@@ -104,7 +103,6 @@ public class AdresDefteriService {
                         Collectors.counting()
                 ));
 
-        // Frekansı 1'den büyük olan (mükerrer) kişileri filtrele
         return defter.values().stream()
                 .filter(kisi -> {
                     String anahtar = (kisi.getAd() + kisi.getSoyad()).toLowerCase();

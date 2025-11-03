@@ -21,7 +21,7 @@ public final class Constants {
             "HATA: Bu E-Posta (%s) adresi zaten kayıtlı.";
 
     public static final String MSG_HATA_TELEFON_MUKERRER =
-            "HATA: Bu telefon numarası (%s) zaten kayıtlı."; // (Yeni kuralın mesajı)
+            "HATA: Bu telefon numarası (%s) zaten kayıtlı.";
 
     public static final String MSG_HATA_EPOSTA_GECERSIZ =
             "HATA: E-posta adresi geçerli bir alana sahip değil. (%s gibi alanlar kullanın)";
@@ -30,10 +30,10 @@ public final class Constants {
             "HATA: Telefon numarası " + GECERLI_TELEFON_UZUNLUGU + " haneli olmalıdır.";
 
     public static final String MSG_BASARILI_EKLEME =
-            "BAŞARILI: %s kişisi adres defterine eklendi."; // %s = Kişinin Adı
+            "BAŞARILI: %s kişisi adres defterine eklendi.";
 
     public static final String MSG_BASARILI_SILME =
-            "BAŞARILI: %s kişisi silindi."; // %s = Kişinin Adı
+            "BAŞARILI: %s kişisi silindi.";
 
     public static final String MSG_BILGI_YUKLEME_YOK =
             "BİLGİ: Kayıt dosyası bulunamadı. Yeni boş defter oluşturuldu";
@@ -42,5 +42,5 @@ public final class Constants {
             "BİLGİ: Aranan kriterlere uygun kayıt bulunamadı.";
 
     public static final String MSG_HATA_KAYIT_SIRASINDA =
-            "HATA: Veri kaydı sırasında bir hata oluştu. Hata: %s"; // %s = e.getMessage()
+            "HATA: Veri kaydı sırasında bir hata oluştu. Hata: %s";
 }
