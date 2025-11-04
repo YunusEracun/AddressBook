@@ -43,4 +43,7 @@ public final class Constants {
 
     public static final String MSG_HATA_KAYIT_SIRASINDA =
             "HATA: Veri kaydı sırasında bir hata oluştu. Hata: %s";
+
+    public static final String MSG_HATA_ISIM_SOYISIM_GECERSIZ =
+            "HATA: İsim veya soyisim sadece harflerden oluşmalıdır.";
 }

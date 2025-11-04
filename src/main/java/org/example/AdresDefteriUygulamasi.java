@@ -5,9 +5,9 @@ import java.util.Scanner;
 
 public class AdresDefteriUygulamasi {
 
-    private static AdresDefteriService manager = new AdresDefteriService();
-    private static Scanner scanner = new Scanner(System.in);
-    private static InputManager inputManager = InputManager.getInstance(scanner);
+    private static final AdresDefteriService manager = new AdresDefteriService();
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final InputManager inputManager = InputManager.getInstance(scanner);
 
 
     public static void main(String[] args) {
@@ -34,31 +34,18 @@ public class AdresDefteriUygulamasi {
 
     private static void islemYap(int secim) {
         switch (secim) {
-            case 1:
-                yeniKisiEkle();
-                break;
-            case 2:
-                manager.tumKisileriListele();
-                break;
-            case 3:
-                kisiAramaMenu();
-                break;
-            case 4:
-                kisiSil();
-                break;
-            case 5:
-                mukerrerKontrol();
-                break;
-            case 6:
-                jsonCiktiGoster();
-                break;
-            case 7:
+            case 1 -> yeniKisiEkle();
+            case 2 -> manager.tumKisileriListele();
+            case 3 -> kisiAramaMenu();
+            case 4 -> kisiSil();
+            case 5 -> mukerrerKontrol();
+            case 6 -> jsonCiktiGoster();
+            case 7 -> {
                 System.out.println("Uygulamadan çıkılıyor. Veriler kaydediliyor...");
                 manager.verileriKaydet();
                 System.exit(0);
-                break;
-            default:
-                System.out.println("Geçersiz seçim. Lütfen menüdeki rakamlardan birini girin.");
+            }
+            default -> System.out.println("Geçersiz seçim. Lütfen menüdeki rakamlardan birini girin.");
         }
     }
 
@@ -97,6 +84,10 @@ public class AdresDefteriUygulamasi {
 
             case HATA_TELEFON_MUKERRER:
                 mesajYazdir(sonuc, yeniKisi.getTelefonNumarasi());
+                break;
+
+            case HATA_ISIM_SOYISIM_GECERSIZ:
+                mesajYazdir(sonuc);
                 break;
 
             default:
@@ -213,6 +204,9 @@ public class AdresDefteriUygulamasi {
                 break;
             case HATA_TELEFON_MUKERRER:
                 mesajSablonu = Constants.MSG_HATA_TELEFON_MUKERRER;
+                break;
+            case HATA_ISIM_SOYISIM_GECERSIZ:
+                mesajSablonu = Constants.MSG_HATA_ISIM_SOYISIM_GECERSIZ;
                 break;
             case BILGI_YUKLEME_YOK:
                 mesajSablonu = Constants.MSG_BILGI_YUKLEME_YOK;

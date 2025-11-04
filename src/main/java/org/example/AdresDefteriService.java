@@ -29,7 +29,10 @@ public class AdresDefteriService {
         return defter.get(ePosta.toLowerCase());
     }
 
+
     public IslemSonucu kisiEkleme(Kisi yeniKisi) {
+
+
         String anahtar = yeniKisi.getEPosta().toLowerCase();
         String telefonNumarasi = yeniKisi.getTelefonNumarasi();
 
@@ -44,11 +47,23 @@ public class AdresDefteriService {
         if (defter.containsKey(anahtar)) {
             return IslemSonucu.HATA_EPOSTA_MUKERRER;
         }
+        if(!harfDogrula(yeniKisi.getAd())) {
+            return IslemSonucu.HATA_ISIM_SOYISIM_GECERSIZ;
+        }
+        if(!harfDogrula(yeniKisi.getSoyad())) {
+            return IslemSonucu.HATA_ISIM_SOYISIM_GECERSIZ;
+        }
 
         defter.put(anahtar, yeniKisi);
         kullanilanTelefonlar.add(telefonNumarasi);
 
         return IslemSonucu.BASARILI_EKLEME;
+    }
+    private boolean harfDogrula(String metin) {
+        if (metin == null || metin.trim().isEmpty()) {
+            return false;
+        }
+        return metin.matches("^[\\p{L} ]+$");
     }
 
     public void tumKisileriListele() {
