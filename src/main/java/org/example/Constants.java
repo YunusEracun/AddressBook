@@ -2,48 +2,45 @@ package org.example;
 
 public final class Constants {
 
-    // Bu sınıfın nesnesinin oluşturulmasını engeller.
+    // Prevent instantiation of this class
     private Constants() {}
 
+    // --- RESTRICTIONS AND SETTINGS ---
+    public static final int VALID_PHONE_LENGTH = 10;
 
-
-    // --- KISITLAMALAR VE AYARLAR ---
-    public static final int GECERLI_TELEFON_UZUNLUGU = 10;
-
-    public static final String[] GECERLI_EMAIL_DOMAINLERI =
+    public static final String[] VALID_EMAIL_DOMAINS =
             { "@hotmail.com", "@gmail.com", "@outlook.com" };
 
-    public static final String DOSYA_ADRES = "adres_defteri.json";
+    public static final String FILE_PATH = "address_book.json";
 
-    // Sonuç mesajları
+    // --- RESULT MESSAGES ---
+    public static final String ERROR_DUPLICATE_EMAIL =
+            "ERROR: This email address (%s) is already registered.";
 
-    public static final String MSG_HATA_EPOSTA_MUKERRER =
-            "HATA: Bu E-Posta (%s) adresi zaten kayıtlı.";
+    public static final String ERROR_DUPLICATE_PHONE =
+            "ERROR: This phone number (%s) is already registered.";
 
-    public static final String MSG_HATA_TELEFON_MUKERRER =
-            "HATA: Bu telefon numarası (%s) zaten kayıtlı.";
+    public static final String ERROR_INVALID_EMAIL =
+            "ERROR: The email address domain is invalid. Use domains like (%s).";
 
-    public static final String MSG_HATA_EPOSTA_GECERSIZ =
-            "HATA: E-posta adresi geçerli bir alana sahip değil. (%s gibi alanlar kullanın)";
+    public static final String ERROR_INVALID_PHONE =
+            "ERROR: The phone number must be " + VALID_PHONE_LENGTH + " digits long.";
 
-    public static final String MSG_HATA_TELEFON_GECERSIZ =
-            "HATA: Telefon numarası " + GECERLI_TELEFON_UZUNLUGU + " haneli olmalıdır.";
+    public static final String SUCCESS_ADD =
+            "SUCCESS: %s has been added to the address book.";
 
-    public static final String MSG_BASARILI_EKLEME =
-            "BAŞARILI: %s kişisi adres defterine eklendi.";
+    public static final String SUCCESS_DELETE =
+            "SUCCESS: %s has been deleted.";
 
-    public static final String MSG_BASARILI_SILME =
-            "BAŞARILI: %s kişisi silindi.";
+    public static final String INFO_NO_FILE_FOUND =
+            "INFO: No record file found. A new empty address book has been created.";
 
-    public static final String MSG_BILGI_YUKLEME_YOK =
-            "BİLGİ: Kayıt dosyası bulunamadı. Yeni boş defter oluşturuldu";
+    public static final String INFO_NO_MATCH_FOUND =
+            "INFO: No records found matching the search criteria.";
 
-    public static final String MSG_BILGI_KAYIT_BULUNAMADI =
-            "BİLGİ: Aranan kriterlere uygun kayıt bulunamadı.";
+    public static final String ERROR_DURING_SAVE =
+            "ERROR: An error occurred while saving data. Details: %s";
 
-    public static final String MSG_HATA_KAYIT_SIRASINDA =
-            "HATA: Veri kaydı sırasında bir hata oluştu. Hata: %s";
-
-    public static final String MSG_HATA_ISIM_SOYISIM_GECERSIZ =
-            "HATA: İsim veya soyisim sadece harflerden oluşmalıdır.";
+    public static final String ERROR_INVALID_NAME_SURNAME =
+            "ERROR: First name and last name must contain only letters.";
 }

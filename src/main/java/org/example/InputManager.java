@@ -23,7 +23,7 @@ public class InputManager {
                 scanner.nextLine();
                 return input;
             } else {
-                System.out.println("Geçersiz giriş. Lütfen sadece bir sayı girin.");
+                System.out.println("Invalid input. Please enter a valid number.");
                 scanner.nextLine();
                 System.out.print(prompt);
             }
@@ -36,7 +36,7 @@ public class InputManager {
             System.out.print(prompt);
             input = scanner.nextLine().trim();
             if (input.isEmpty()) {
-                System.out.println("Bu alan boş bırakılamaz. Lütfen bir değer girin.");
+                System.out.println("This field cannot be empty. Please enter a value.");
             }
         } while (input.isEmpty());
         return input;
