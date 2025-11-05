@@ -45,7 +45,7 @@ public class AddressBookService {
             return OperationResult.ERROR_DUPLICATE_EMAIL;
         }
 
-        if (!validateLetters(newPerson.getFirstName())) {
+        if (!validateLetters(newPerson.getName())) {
             return OperationResult.ERROR_INVALID_NAME_SURNAME;
         }
 
@@ -75,7 +75,7 @@ public class AddressBookService {
         System.out.println("\n--- Address Book List (" + addressBook.size() + " People) ---");
 
         addressBook.values().stream()
-                .sorted(Comparator.comparing(Person::getFirstName)) // Sort by first name
+                .sorted(Comparator.comparing(Entry::getName)) // Sort by first name
                 .forEach(System.out::println);
 
         System.out.println("--------------------------------");
@@ -86,7 +86,7 @@ public class AddressBookService {
         if (addressBook.containsKey(key)) {
             Person removed = addressBook.remove(key);
             usedPhoneNumbers.remove(removed.getPhoneNumber());
-            System.out.println("SUCCESS: " + removed.getFirstName() + " has been deleted.");
+            System.out.println("SUCCESS: " + removed.getName() + " has been deleted.");
             return true;
         }
         System.out.println("ERROR: No person found with the email address " + email + ".");
@@ -99,7 +99,7 @@ public class AddressBookService {
                 .filter(person -> {
                     switch (searchType.toLowerCase()) {
                         case "firstname":
-                            return person.getFirstName().toLowerCase().contains(lowerValue);
+                            return person.getName().toLowerCase().contains(lowerValue);
                         case "lastname":
                             return person.getLastName().toLowerCase().contains(lowerValue);
                         case "phone":
@@ -114,13 +114,13 @@ public class AddressBookService {
     public Collection<Person> findDuplicateNames() {
         Map<String, Long> frequencyMap = addressBook.values().stream()
                 .collect(Collectors.groupingBy(
-                        p -> (p.getFirstName() + p.getLastName()).toLowerCase(),
+                        p -> (p.getName() + p.getLastName()).toLowerCase(),
                         Collectors.counting()
                 ));
 
         return addressBook.values().stream()
                 .filter(p -> {
-                    String key = (p.getFirstName() + p.getLastName()).toLowerCase();
+                    String key = (p.getName() + p.getLastName()).toLowerCase();
                     return frequencyMap.getOrDefault(key, 0L) > 1;
                 })
                 .collect(Collectors.toList());
@@ -175,11 +175,11 @@ public class AddressBookService {
         String email = person.getEmail();
         String phone = person.getPhoneNumber();
 
-        if (!validateEmail(email)) {
+        if (validateEmail(email)) {
             return OperationResult.ERROR_INVALID_EMAIL;
         }
 
-        if (!validatePhoneLength(phone)) {
+        if (validatePhoneLength(phone)) {
             return OperationResult.ERROR_INVALID_PHONE;
         }
 

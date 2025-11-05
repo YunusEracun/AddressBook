@@ -62,7 +62,7 @@ public class AddressBookApplication {
 
         switch (result) {
             case SUCCESS_ADD:
-                printMessage(result, newPerson.getFirstName());
+                printMessage(result, newPerson.getName());
                 break;
 
             case ERROR_INVALID_EMAIL:
