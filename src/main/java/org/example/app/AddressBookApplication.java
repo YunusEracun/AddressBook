@@ -10,7 +10,7 @@ import org.example.util.OperationResult;
 
 import java.util.Collection;
 import java.util.Scanner;
-
+// d
 public class AddressBookApplication {
 
     private static final AddressBookService manager = new AddressBookService();
