@@ -6,8 +6,8 @@ public class Person extends Entry {
     @SerializedName("lastName")
     private String lastName;
 
-    public Person(String name,String lastName, String phonenumber, String email) {
-        super(name, phonenumber, email);
+    public Person(String name,String email ,String phoneNumber, String lastName) {
+        super(name, email, phoneNumber);
         this.lastName = lastName;
     }
 
@@ -17,6 +17,7 @@ public class Person extends Entry {
     public String getDetails() {
         return "Last Name: " + lastName;
     }
+
     @Override
     public String toString() {
         return "Name: " + getName() +

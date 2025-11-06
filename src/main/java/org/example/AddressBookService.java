@@ -9,13 +9,15 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.stream.Collectors;
 
-import static org.example.Constants.*;
+import static org.example.Constants.FILE_PATH;
+import static org.example.Constants.VALID_EMAIL_DOMAINS;
+import static org.example.Constants.VALID_PHONE_LENGTH;
 
 public class AddressBookService {
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private Map<String, Person> addressBook;
+    private Map<String, Entry> addressBook;
     private final Set<String> usedPhoneNumbers;
 
     public AddressBookService() {
@@ -23,16 +25,16 @@ public class AddressBookService {
         this.usedPhoneNumbers = new HashSet<>();
     }
 
-    public Person findPersonByEmail(String email) {
+    public Entry findEntryByEmail(String email) {
         return addressBook.get(email.toLowerCase());
     }
 
-    public OperationResult addPerson(Person newPerson) {
+    public OperationResult addEntry(Entry newEntry) {
 
-        String key = newPerson.getEmail().toLowerCase();
-        String phoneNumber = newPerson.getPhoneNumber();
+        String key = newEntry.getEmail().toLowerCase();
+        String phoneNumber = newEntry.getPhoneNumber();
 
-        OperationResult validationResult = validatePerson(newPerson);
+        OperationResult validationResult = validateEntry(newEntry);
         if (validationResult != null) {
             return validationResult;
         }
@@ -45,15 +47,7 @@ public class AddressBookService {
             return OperationResult.ERROR_DUPLICATE_EMAIL;
         }
 
-        if (!validateLetters(newPerson.getName())) {
-            return OperationResult.ERROR_INVALID_NAME_SURNAME;
-        }
-
-        if (!validateLetters(newPerson.getLastName())) {
-            return OperationResult.ERROR_INVALID_NAME_SURNAME;
-        }
-
-        addressBook.put(key, newPerson);
+        addressBook.put(key, newEntry);
         usedPhoneNumbers.add(phoneNumber);
 
         return OperationResult.SUCCESS_ADD;
@@ -66,13 +60,13 @@ public class AddressBookService {
         return text.matches("^[\\p{L} ]+$");
     }
 
-    public void listAllPeople() {
+    public void listAllEntries() {
         if (addressBook.isEmpty()) {
             System.out.println("The address book is currently empty.");
             return;
         }
 
-        System.out.println("\n--- Address Book List (" + addressBook.size() + " People) ---");
+        System.out.println("\n--- Address Book List (" + addressBook.size() + " Entries ---");
 
         addressBook.values().stream()
                 .sorted(Comparator.comparing(Entry::getName)) // Sort by first name
@@ -81,10 +75,10 @@ public class AddressBookService {
         System.out.println("--------------------------------");
     }
 
-    public boolean deletePerson(String email) {
+    public boolean deleteEntry(String email) {
         String key = email.toLowerCase();
         if (addressBook.containsKey(key)) {
-            Person removed = addressBook.remove(key);
+            Entry removed = addressBook.remove(key);
             usedPhoneNumbers.remove(removed.getPhoneNumber());
             System.out.println("SUCCESS: " + removed.getName() + " has been deleted.");
             return true;
@@ -93,34 +87,55 @@ public class AddressBookService {
         return false;
     }
 
-    public Collection<Person> searchPerson(String value, String searchType) {
-        String lowerValue = value.toLowerCase();
-        return addressBook.values().stream()
-                .filter(person -> {
-                    switch (searchType.toLowerCase()) {
-                        case "firstname":
-                            return person.getName().toLowerCase().contains(lowerValue);
-                        case "lastname":
-                            return person.getLastName().toLowerCase().contains(lowerValue);
-                        case "phone":
-                            return person.getPhoneNumber().contains(value);
-                        default:
-                            return false;
+    public Collection<Entry> searchEntries(String entryType, String searchField, String searchValue) {
+        String lowerSearchValue = searchValue.toLowerCase();
+
+        var stream = addressBook.values().stream();
+
+        if (entryType.equalsIgnoreCase("Person")) {
+            stream = stream.filter(entry -> entry instanceof Person);
+        } else if (entryType.equalsIgnoreCase("Company")) {
+            stream = stream.filter(entry -> entry instanceof Company);
+        }
+
+        return stream.filter(entry -> {
+            switch (searchField.trim().toLowerCase()) {
+                case "name":
+                    return entry.getName().toLowerCase().contains(lowerSearchValue);
+                case "phone":
+                    return entry.getPhoneNumber().contains(searchValue);
+                case "lastName":
+                    if (entry instanceof Person person) {
+                        return person.getLastName().toLowerCase().contains(lowerSearchValue);
                     }
-                })
-                .collect(Collectors.toList());
+                    return false;
+                case "taxnumber":
+                    if (entry instanceof Company company) {
+                        return company.getTaxNumber().contains(lowerSearchValue);
+                    }
+                    return false;
+                case "address":
+                    if (entry instanceof Company company) {
+                        return company.getAddress().contains(lowerSearchValue);
+                    }
+                    return false;
+                    default:
+                        return false;
+            }
+        }).collect(Collectors.toList());
+
     }
 
-    public Collection<Person> findDuplicateNames() {
+    public Collection<Entry> findDuplicateNames() {
         Map<String, Long> frequencyMap = addressBook.values().stream()
                 .collect(Collectors.groupingBy(
-                        p -> (p.getName() + p.getLastName()).toLowerCase(),
+                        p -> (p.getName().toLowerCase()),
                         Collectors.counting()
                 ));
 
         return addressBook.values().stream()
-                .filter(p -> {
-                    String key = (p.getName() + p.getLastName()).toLowerCase();
+                .filter(entry -> {
+                    String key = entry.getName().toLowerCase();
                     return frequencyMap.getOrDefault(key, 0L) > 1;
                 })
                 .collect(Collectors.toList());
@@ -153,12 +168,14 @@ public class AddressBookService {
             Map<String, Person> loadedBook = gson.fromJson(reader, mapType);
 
             if (loadedBook != null) {
-                this.addressBook = loadedBook;
+                // Yüklenenleri 'Entry' Map'ine aktarıyoruz
+                this.addressBook = new HashMap<>(loadedBook);
+
                 this.usedPhoneNumbers.clear();
-                for (Person person : addressBook.values()) {
-                    this.usedPhoneNumbers.add(person.getPhoneNumber());
+                for (Entry entry : addressBook.values()) {
+                    this.usedPhoneNumbers.add(entry.getPhoneNumber());
                 }
-                System.out.println("SUCCESS: " + addressBook.size() + " people loaded into the address book.");
+                System.out.println("SUCCESS: " + addressBook.size() + " entries loaded into the address book.");
                 return true;
             } else {
                 System.out.println("INFO: Record file is empty or unreadable. Using a new empty address book.");
@@ -171,15 +188,15 @@ public class AddressBookService {
         }
     }
 
-    private OperationResult validatePerson(Person person) {
-        String email = person.getEmail();
-        String phone = person.getPhoneNumber();
+    private OperationResult validateEntry(Entry entry) {
+        String email = entry.getEmail();
+        String phone = entry.getPhoneNumber();
 
-        if (validateEmail(email)) {
+        if (!validateEmail(email)) {
             return OperationResult.ERROR_INVALID_EMAIL;
         }
 
-        if (validatePhoneLength(phone)) {
+        if (!validatePhoneLength(phone)) {
             return OperationResult.ERROR_INVALID_PHONE;
         }
 

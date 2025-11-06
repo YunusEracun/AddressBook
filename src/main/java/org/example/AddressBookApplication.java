@@ -21,11 +21,11 @@ public class AddressBookApplication {
 
     private static void showMenu() {
         System.out.println("\n--- Menu ---");
-        System.out.println("1. Add New Person");
-        System.out.println("2. List All People");
-        System.out.println("3. Search Person");
-        System.out.println("4. Delete Person (by Email)");
-        System.out.println("5. Find Duplicate Names");
+        System.out.println("1. Add New Entry");
+        System.out.println("2. List All Entries");
+        System.out.println("3. Search Entries");
+        System.out.println("4. Delete Entry (by Email)");
+        System.out.println("5. Find Duplicate Names/Company Names");
         System.out.println("6. Print Data as JSON");
         System.out.println("7. SAFE EXIT and SAVE");
         System.out.println("-------------");
@@ -33,10 +33,10 @@ public class AddressBookApplication {
 
     private static void handleAction(int choice) {
         switch (choice) {
-            case 1 -> addNewPerson();
-            case 2 -> manager.listAllPeople();
+            case 1 -> addNewEntry();
+            case 2 -> manager.listAllEntries();
             case 3 -> searchMenu();
-            case 4 -> deletePerson();
+            case 4 -> deleteEntry();
             case 5 -> checkDuplicates();
             case 6 -> printJsonOutput();
             case 7 -> {
@@ -48,84 +48,118 @@ public class AddressBookApplication {
         }
     }
 
-    private static void addNewPerson() {
-        System.out.println("\n--- Add New Person ---");
+    private static void addNewEntry() {
+        System.out.println("/n--- Add New Entry ---");
+        int typeChoice;
+        do {
+            typeChoice = inputManager.getIntInput("Select Entry Type (1: Person 2.Company");
+            if (typeChoice != 1 && typeChoice != 2) {
+                System.out.println("Invalid choice. Please enter a number from the menu.");
+            }
+        } while (typeChoice != 1 && typeChoice != 2);
 
-        String firstName = inputManager.getStringInput("First Name: ");
-        String lastName = inputManager.getStringInput("Last Name: ");
-        String phone = inputManager.getStringInput("Phone Number: ");
-        String email = inputManager.getStringInput("Email Address: ");
+        String name = inputManager.getStringInput("Enter Name: ");
+        String email = inputManager.getStringInput("Enter Email: ");
+        String phone = inputManager.getStringInput("Enter Phone Number: ");
 
-        Person newPerson = new Person(firstName, lastName, phone, email);
+        Entry newEntry = null;
+        OperationResult result;
 
-        OperationResult result = manager.addPerson(newPerson);
+        try {
+            if(typeChoice == 1) {
+                String LastName = inputManager.getStringInput("Last Name: ");
+                newEntry = new Person(name, email, phone, LastName);
+            } else {
+                String taxNumber = inputManager.getStringInput("Tax Number: ");
+                String address = inputManager.getStringInput("Address: ");
+                newEntry = new Company(name, email, phone, address, taxNumber);
+            }
+            result = manager.addEntry(newEntry);
 
-        switch (result) {
-            case SUCCESS_ADD:
-                printMessage(result, newPerson.getName());
-                break;
-
-            case ERROR_INVALID_EMAIL:
-                String domains = String.join(", ", Constants.VALID_EMAIL_DOMAINS);
-                printMessage(result, domains);
-                break;
-
-            case ERROR_INVALID_PHONE:
-                printMessage(result);
-                break;
-
-            case ERROR_DUPLICATE_EMAIL:
-                printMessage(result, newPerson.getEmail());
-                break;
-
-            case ERROR_DUPLICATE_PHONE:
-                printMessage(result, newPerson.getPhoneNumber());
-                break;
-
-            case ERROR_INVALID_NAME_SURNAME:
-                printMessage(result);
-                break;
-
-            default:
-                System.err.println("CRITICAL ERROR: Unexpected operation result: " + result);
-                break;
+            printMessage(result, newEntry.getName());
+        } catch (IllegalArgumentException e) {
+            System.out.println("VALIDATION ERROR: " + e.getMessage());
         }
     }
 
     private static void searchMenu() {
-        System.out.println("\n--- SEARCH TYPE ---");
-        System.out.println("1. Search by First Name");
-        System.out.println("2. Search by Last Name");
-        System.out.println("3. Search by Phone Number");
-        System.out.println("4. Quick Search by Email");
+        System.out.println("\n--- SEARCH Entry TYPE ---");
+        System.out.println("1. Search Person");
+        System.out.println("2. Search Company");
         System.out.println("0. Back");
 
-        int subChoice = inputManager.getIntInput("Your choice (0-4): ");
+        int typeChoice = inputManager.getIntInput("Your choice (0-2): ");
 
-        switch (subChoice) {
-            case 1 -> searchAndPrint("firstname");
-            case 2 -> searchAndPrint("lastname");
-            case 3 -> searchAndPrint("phone");
-            case 4 -> quickSearchByEmail();
-            case 0 -> System.out.println("Returning to main menu.");
+        switch (typeChoice) {
+            case 1 -> searchSubMenu("Person");
+            case 2 -> searchSubMenu("Company");
+            case 0 -> System.out.println("Returnıng to main menu.");
             default -> System.out.println("Invalid choice.");
         }
     }
 
-    private static void deletePerson() {
+    private static void  searchSubMenu(String entryType) {
+        System.out.println("\n--- Search Fields for " + entryType.toUpperCase() + " ---");
+        System.out.println("1. Search by Name");
+        System.out.println("2. Search by Phone Number");
+        System.out.println("3. Quick Search by Email (O(1))");
+
+        if (entryType.equals("Person")) {
+            System.out.println("4. Search by Last Name ");
+        } else {
+            System.out.println("4. Search by Tax Number");
+            System.out.println("5. Search by Address ");
+        }
+        System.out.println("0. Back");
+
+        int fieldChoice = inputManager.getIntInput("Your choice: ");
+        String searchField="";
+
+        switch (fieldChoice) {
+            case 1 -> searchField ="name";
+            case 2 -> searchField ="phone";
+            case 3 -> {
+                quickSearchByEmail();
+                return;
+            }
+            case 4 -> {
+                if(entryType.equals("Person")) {
+                    searchField ="lastName";
+                } else {
+                    searchField ="taxNumber";
+                }
+            }
+            case 5 -> {
+                if(entryType.equals("Company")) {
+                    searchField ="address";
+                } else {
+                    System.out.println("Invalid choice.");
+                    return;
+                }
+            }
+            case 0 -> {
+                return;
+            }
+            default -> System.out.println("Invalid choice.");
+        }
+        searchAndPrint(entryType, searchField);
+
+    }
+
+    private static void deleteEntry() {
         System.out.println("\n--- Delete Person ---");
         String email = inputManager.getStringInput("Enter the email address of the person to delete: ");
-        manager.deletePerson(email);
+        manager.deleteEntry(email);
     }
 
     private static void checkDuplicates() {
-        Collection<Person> duplicates = manager.findDuplicateNames();
+        Collection<Entry> duplicates = manager.findDuplicateNames();
         System.out.println("\n--- DUPLICATE RECORDS ---");
         if (duplicates.isEmpty()) {
             System.out.println("No duplicate records found.");
         } else {
             System.out.println(duplicates.size() + " duplicate record(s) found:");
-            for (Person p : duplicates) {
+            for (Entry p : duplicates) {
                 System.out.println(p);
             }
         }
@@ -138,17 +172,19 @@ public class AddressBookApplication {
         System.out.println("-------------------");
     }
 
-    private static void searchAndPrint(String searchType) {
-        String searchValue = inputManager.getStringInput("Enter the " + searchType + " to search: ");
-        Collection<Person> results = manager.searchPerson(searchValue, searchType);
+    private static void searchAndPrint(String entryType, String searchField) {
+        String searchValue = inputManager.getStringInput("Enter the " + searchField + " to search: ");
 
-        System.out.println("\n--- SEARCH RESULTS (" + searchType.toUpperCase() + ") ---");
+        // Service'teki yeni metodu çağırıyoruz
+        Collection<Entry> results = manager.searchEntries(entryType, searchField, searchValue);
+
+        System.out.println("\n--- SEARCH RESULTS (" + searchField.toUpperCase() + ") ---");
         if (results.isEmpty()) {
             System.out.println("No records found matching '" + searchValue + "'.");
         } else {
             System.out.println(results.size() + " record(s) found:");
-            for (Person person : results) {
-                System.out.println(person);
+            for (Entry entry : results) {
+                System.out.println(entry);
             }
         }
         System.out.println("----------------------------------------");
@@ -157,7 +193,7 @@ public class AddressBookApplication {
     private static void quickSearchByEmail() {
         String email = inputManager.getStringInput("Enter the email address to search: ");
 
-        Person found = manager.findPersonByEmail(email);
+        Entry found = manager.findEntryByEmail(email);
 
         System.out.println("\n--- EMAIL SEARCH RESULT ---");
         if (found != null) {
