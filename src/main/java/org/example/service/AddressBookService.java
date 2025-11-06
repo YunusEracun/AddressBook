@@ -1,17 +1,21 @@
-package org.example;
+package org.example.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.example.util.OperationResult;
+import org.example.model.Company;
+import org.example.model.Entry;
+import org.example.model.Person;
 
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.stream.Collectors;
 
-import static org.example.Constants.FILE_PATH;
-import static org.example.Constants.VALID_EMAIL_DOMAINS;
-import static org.example.Constants.VALID_PHONE_LENGTH;
+import static org.example.util.Constants.FILE_PATH;
+import static org.example.util.Constants.VALID_EMAIL_DOMAINS;
+import static org.example.util.Constants.VALID_PHONE_LENGTH;
 
 public class AddressBookService {
 

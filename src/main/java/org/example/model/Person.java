@@ -1,6 +1,5 @@
-package org.example;
+package org.example.model;
 import com.google.gson.annotations.SerializedName;
-import java.util.Objects;
 
 public class Person extends Entry {
     @SerializedName("lastName")

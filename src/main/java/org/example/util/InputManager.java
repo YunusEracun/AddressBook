@@ -1,6 +1,5 @@
-package org.example;
+package org.example.util;
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class InputManager {

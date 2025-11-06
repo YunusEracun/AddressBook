@@ -1,4 +1,4 @@
-package org.example;
+package org.example.util;
 
 // Represents all possible result types (success/error) returned by the Service layer to the UI layer.
 public enum OperationResult {

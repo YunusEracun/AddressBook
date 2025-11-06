@@ -1,4 +1,4 @@
-package org.example;
+package org.example.model;
 
 public class Company extends Entry {
     private String taxNumber;

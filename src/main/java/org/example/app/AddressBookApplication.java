@@ -1,4 +1,12 @@
-package org.example;
+package org.example.app;
+
+import org.example.model.Company;
+import org.example.model.Entry;
+import org.example.model.Person;
+import org.example.service.AddressBookService;
+import org.example.util.Constants;
+import org.example.util.InputManager;
+import org.example.util.OperationResult;
 
 import java.util.Collection;
 import java.util.Scanner;
